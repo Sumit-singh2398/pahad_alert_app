@@ -5,196 +5,241 @@ class AlertsScreen extends StatelessWidget {
 
   static const Color primaryBlue = Color(0xFF1769E0);
   static const Color darkBlue = Color(0xFF123B70);
-  static const Color lightBlue = Color(0xFFF4F8FF);
+  static const Color background = Color(0xFFF6F8FC);
+  static const Color lightBlue = Color(0xFFEFF5FF);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: background,
+
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+
+        iconTheme: const IconThemeData(
+          color: darkBlue,
+        ),
+
         title: const Text(
-          'Notifications & Alerts',
+          'Alerts',
           style: TextStyle(
             color: darkBlue,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: darkBlue),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(18),
-        children: [
-          const Text(
-            'Safety Alerts',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: darkBlue,
-            ),
-          ),
 
-          const SizedBox(height: 15),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
 
-          _alertCard(
-            Icons.warning_amber_rounded,
-            'Landslide Alert',
-            'No active landslide alert in your area.',
-            'LOW RISK',
-          ),
-
-          _alertCard(
-            Icons.water_drop_outlined,
-            'Heavy Rainfall',
-            'Rainfall monitoring is active around your location.',
-            'MONITORING',
-          ),
-
-          _alertCard(
-            Icons.directions_car_outlined,
-            'Road Alert',
-            'No major road blockage reported nearby.',
-            'NORMAL',
-          ),
-
-          const SizedBox(height: 20),
-
-          const Text(
-            'Recent Notifications',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: darkBlue,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          _notification(
-            Icons.cloud_outlined,
-            'Weather Update',
-            'Weather conditions are being monitored.',
-          ),
-
-          _notification(
-            Icons.security_outlined,
-            'Safety Reminder',
-            'Stay alert during heavy rainfall.',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _alertCard(
-    IconData icon,
-    String title,
-    String subtitle,
-    String status,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: lightBlue,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: Icon(
-              icon,
-              color: primaryBlue,
-            ),
-          ),
-          const SizedBox(width: 13),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: darkBlue,
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: primaryBlue,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.notifications_none_rounded,
+                    color: Colors.white,
+                    size: 32,
                   ),
+
+                  SizedBox(height: 12),
+
+                  Text(
+                    'Safety Alerts',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  SizedBox(height: 5),
+
+                  Text(
+                    'Important updates and warnings from your area',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            const Text(
+              'Active Alerts',
+              style: TextStyle(
+                color: darkBlue,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // No active alerts
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 28,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: Colors.grey.shade200,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 58,
+                    width: 58,
+                    decoration: BoxDecoration(
+                      color: lightBlue,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_outline,
+                      color: primaryBlue,
+                      size: 30,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  const Text(
+                    'No Active Alerts',
+                    style: TextStyle(
+                      color: darkBlue,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    'There are no active safety alerts in your area.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            const Text(
+              'Recent Alerts',
+              style: TextStyle(
+                color: darkBlue,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Empty recent alerts
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 24,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.notifications_none_rounded,
                     color: Colors.grey,
+                    size: 32,
                   ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            status,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: primaryBlue,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _notification(
-    IconData icon,
-    String title,
-    String subtitle,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.grey.shade200,
+                  SizedBox(height: 10),
+
+                  Text(
+                    'No Recent Alerts',
+                    style: TextStyle(
+                      color: darkBlue,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  SizedBox(height: 5),
+
+                  Text(
+                    'Your recent safety notifications will appear here.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Future backend note
+            Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: lightBlue,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: primaryBlue,
+                    size: 21,
+                  ),
+
+                  SizedBox(width: 10),
+
+                  Expanded(
+                    child: Text(
+                      'Safety alerts will be updated automatically when live data is connected.',
+                      style: TextStyle(
+                        color: darkBlue,
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            color: primaryBlue,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: darkBlue,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
