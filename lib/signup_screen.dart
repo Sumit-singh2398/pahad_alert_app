@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'homescreen.dart';
+import 'signup_otp_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -33,11 +33,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  
   void signup() {
+    // Validate all input fields
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    // Check required permissions
     if (!locationPermission ||
         !smsPermission ||
         !notificationPermission) {
@@ -52,14 +55,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    Navigator.pushReplacement(
+    // Open OTP screen and pass the phone number
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
+        builder: (context) => SignupOtpScreen(
+          phoneNumber: phoneController.text.trim(),
+        ),
       ),
     );
   }
 
+  
   InputDecoration fieldDecoration({
     required String hint,
     required IconData icon,
@@ -93,6 +100,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
 
   Widget permissionTile({
     required IconData icon,
@@ -130,7 +138,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               color: primaryBlue,
             ),
           ),
+
           const SizedBox(width: 12),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,6 +164,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ],
             ),
           ),
+
           Switch(
             value: value,
             activeColor: primaryBlue,
@@ -164,13 +175,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
+      
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -179,6 +195,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
+
         title: const Text(
           'Create Account',
           style: TextStyle(
@@ -187,11 +204,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
+
         centerTitle: true,
       ),
+
+      
+
       body: SafeArea(
         child: Form(
           key: _formKey,
+
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(
               20,
@@ -199,9 +221,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               20,
               30,
             ),
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+
+
                 const Center(
                   child: Column(
                     children: [
@@ -213,7 +239,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           color: darkBlue,
                         ),
                       ),
+
                       SizedBox(height: 6),
+
                       Text(
                         'Create your account to stay safe and informed',
                         textAlign: TextAlign.center,
@@ -228,7 +256,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 24),
 
-                // Profile Photo
+                
                 Center(
                   child: Stack(
                     children: [
@@ -249,6 +277,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           color: primaryBlue,
                         ),
                       ),
+
                       Positioned(
                         right: 0,
                         bottom: 2,
@@ -283,6 +312,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
 
                 const SizedBox(height: 28),
+
+                // ------------------------------------------------
+                // PERSONAL INFORMATION
+                // ------------------------------------------------
 
                 const Text(
                   'Personal Information',
@@ -331,7 +364,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 14),
 
-                // Phone
+                // Phone Number
                 TextFormField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
@@ -370,12 +403,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Address is required';
                     }
+
                     return null;
                   },
                 ),
 
                 const SizedBox(height: 28),
 
+                
                 const Text(
                   'Required Permissions',
                   style: TextStyle(
@@ -438,7 +473,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
-                // Sign Up Button
+                
+
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -464,7 +500,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 18),
 
-                // Login
+                
+
                 Center(
                   child: GestureDetector(
                     onTap: () {
