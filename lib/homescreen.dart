@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
 
-            // ================= HEADER =================
+        
             Container(
               height: 72,
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // ================= TABS =================
+            
             SizedBox(
               height: 55,
               child: Row(
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // ================= LIVE TRACKING =================
+            
             Container(
               height: 58,
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const Expanded(
                     child: Text(
-                      'Track Live (Requires Internet)',
+                      'Track Live ',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -203,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   Switch(
                     value: trackLive,
-                    activeColor: primaryBlue,
+                    activeColor: const Color.fromARGB(255, 5, 87, 47),
                     onChanged: (value) {
                       setState(() {
                         trackLive = value;
@@ -234,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // ================= MAP AREA =================
+        
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -252,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               BorderRadius.circular(35),
                           border: Border.all(
                             color:
-                                primaryBlue.withOpacity(0.45),
+                                const Color.fromARGB(255, 5, 87, 47).withOpacity(0.45),
                             width: 2,
                           ),
                         ),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Colors.black.withOpacity(0.12),
+                                  const Color.fromARGB(255, 0, 0, 0).withOpacity(0.12),
                               blurRadius: 8,
                             ),
                           ],
@@ -295,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
 
-                    // ================= GET HELP =================
+                   
                     Positioned(
                       right: 20,
                       bottom: 25,
