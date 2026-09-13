@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'homescreen.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,6 +14,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController otpController = TextEditingController();
 
   bool otpSent = false;
+
+  static const Color primaryBlue = Color(0xFF1769E0);
+  static const Color darkBlue = Color(0xFF123B70);
+  static const Color lightBlue = Color(0xFFF4F8FF);
 
   @override
   void dispose() {
@@ -51,27 +57,29 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // TODO: OTP verification and HomeScreen navigation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login successful'),
+    // Temporary login navigation.
+    // Real OTP verification will be added later.
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(),
       ),
     );
   }
 
   void signUp() {
-    // TODO: Navigate to SignUpScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SignUpScreen(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF1769E0);
-    const Color darkBlue = Color(0xFF123B70);
-    const Color lightBlue = Color(0xFFF4F8FF);
-
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -79,20 +87,14 @@ class _LoginScreenState extends State<LoginScreen> {
               horizontal: 28,
               vertical: 30,
             ),
-
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 maxWidth: 500,
               ),
-
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  // =========================
-                  // APP LOGO
-                  // =========================
-
+                  // Logo
                   Center(
                     child: Container(
                       width: 76,
@@ -105,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 1.5,
                         ),
                       ),
-
                       child: const Icon(
                         Icons.warning_amber_rounded,
                         size: 42,
@@ -116,10 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  // =========================
-                  // APP NAME
-                  // =========================
-
+                  // App Name
                   const Center(
                     child: Text(
                       'Pahad Alert System',
@@ -149,10 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 52),
 
-                  // =========================
-                  // WELCOME
-                  // =========================
-
                   const Text(
                     'Welcome Back',
                     style: TextStyle(
@@ -174,10 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 32),
 
-                  // =========================
-                  // PHONE NUMBER LABEL
-                  // =========================
-
+                  // Phone Label
                   const Row(
                     children: [
                       Icon(
@@ -199,10 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 10),
 
-                  // =========================
-                  // PHONE INPUT
-                  // =========================
-
+                  // Phone Input
                   Container(
                     height: 58,
                     decoration: BoxDecoration(
@@ -213,11 +201,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 1.5,
                       ),
                     ),
-
                     child: Row(
                       children: [
-
-                        // Country Code
                         Container(
                           width: 75,
                           alignment: Alignment.center,
@@ -228,7 +213,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-
                           child: const Text(
                             '+91',
                             style: TextStyle(
@@ -264,17 +248,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  // =========================
-                  // SEND OTP BUTTON
-                  // =========================
-
+                  // Send OTP
                   SizedBox(
                     width: double.infinity,
                     height: 56,
-
                     child: ElevatedButton(
                       onPressed: sendOtp,
-
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryBlue,
                         foregroundColor: Colors.white,
@@ -283,7 +262,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -304,10 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  // =========================
-                  // OTP SECTION
-                  // =========================
-
+                  // OTP Section
                   if (otpSent) ...[
                     const SizedBox(height: 30),
 
@@ -332,7 +307,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 10),
 
-                    // OTP INPUT
                     Container(
                       height: 58,
                       decoration: BoxDecoration(
@@ -343,7 +317,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: 1.5,
                         ),
                       ),
-
                       child: TextField(
                         controller: otpController,
                         keyboardType: TextInputType.number,
@@ -355,7 +328,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           letterSpacing: 8,
                           color: darkBlue,
                         ),
-
                         decoration: const InputDecoration(
                           hintText: 'Enter 6 digit OTP',
                           hintStyle: TextStyle(
@@ -371,17 +343,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 18),
 
-                    // =========================
-                    // LOGIN BUTTON
-                    // =========================
-
+                    // Login
                     SizedBox(
                       width: double.infinity,
                       height: 56,
-
                       child: ElevatedButton(
                         onPressed: login,
-
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryBlue,
                           foregroundColor: Colors.white,
@@ -390,7 +357,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -414,10 +380,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 35),
 
-                  // =========================
-                  // SIGN UP
-                  // =========================
-
+                  // Sign Up
                   Center(
                     child: Wrap(
                       alignment: WrapAlignment.center,
@@ -429,10 +392,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Color(0xFF64748B),
                           ),
                         ),
-
                         GestureDetector(
                           onTap: signUp,
-
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(
