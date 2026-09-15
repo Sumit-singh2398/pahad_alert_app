@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:arcgis_maps/arcgis_maps.dart';
 
 import 'profile_screen.dart';
 import 'alerts_screen.dart';
@@ -15,35 +17,75 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  // ============================================================
-  // COLORS
-  // ============================================================
-
   static const Color primaryBlue = Color(0xFF1769E0);
   static const Color darkBlue = Color(0xFF123B70);
   static const Color background = Color(0xFFF6F8FC);
   static const Color textDark = Color(0xFF172033);
   static const Color textGrey = Color(0xFF6B7280);
-
   static const Color emergencyRed = Color(0xFFE53935);
   static const Color emergencyDarkRed = Color(0xFFD32F2F);
 
-  // ============================================================
-  // ANIMATION
-  // ============================================================
-
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+  late final ArcGISMapViewController _mapController;
+  late final GraphicsOverlay _landslideOverlay;
+  late final AnimationController _animationController;
+  late final Animation<double> _scaleAnimation;
 
   bool trackLive = false;
 
-  // ============================================================
-  // INIT
-  // ============================================================
+  final List<Map<String, dynamic>> _dummyLandslideData = [
+    {
+      'location': 'Gangtok',
+      'latitude': 27.3389,
+      'longitude': 88.6139,
+      'risk': 'HIGH',
+      'rainfall': '145 mm',
+      'soilMoisture': '82%',
+      'slope': '41°',
+    },
+    {
+      'location': 'Mangan',
+      'latitude': 27.5000,
+      'longitude': 88.5333,
+      'risk': 'HIGH',
+      'rainfall': '168 mm',
+      'soilMoisture': '88%',
+      'slope': '46°',
+    },
+    {
+      'location': 'Namchi',
+      'latitude': 27.1667,
+      'longitude': 88.3500,
+      'risk': 'MODERATE',
+      'rainfall': '92 mm',
+      'soilMoisture': '67%',
+      'slope': '32°',
+    },
+    {
+      'location': 'Singtam',
+      'latitude': 27.2333,
+      'longitude': 88.5000,
+      'risk': 'MODERATE',
+      'rainfall': '81 mm',
+      'soilMoisture': '61%',
+      'slope': '29°',
+    },
+    {
+      'location': 'Ravangla',
+      'latitude': 27.3000,
+      'longitude': 88.3667,
+      'risk': 'LOW',
+      'rainfall': '38 mm',
+      'soilMoisture': '42%',
+      'slope': '18°',
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
+
+    _mapController = ArcGISMapView.createController();
+    _landslideOverlay = GraphicsOverlay();
 
     _animationController = AnimationController(
       vsync: this,
@@ -60,26 +102,125 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
 
-    _animationController.repeat(
-      reverse: true,
+    _animationController.repeat(reverse: true);
+  }
+
+  void _onMapReady() {
+    final map = ArcGISMap.withBasemapStyle(
+      BasemapStyle.arcGISTopographic,
     );
+
+    _mapController.arcGISMap = map;
+
+    if (!_mapController.graphicsOverlays.contains(
+      _landslideOverlay,
+    )) {
+      _mapController.graphicsOverlays.add(
+        _landslideOverlay,
+      );
+    }
+
+    _addDummyLandslideData();
+    _setGangtokViewpoint();
+  }
+
+  void _addDummyLandslideData() {
+    _landslideOverlay.graphics.clear();
+
+    for (final item in _dummyLandslideData) {
+      final double latitude = item['latitude'];
+      final double longitude = item['longitude'];
+      final String risk = item['risk'];
+
+      Color color;
+      double zoneSize;
+      double markerSize;
+
+      if (risk == 'HIGH') {
+        color = Colors.red;
+        zoneSize = 48;
+        markerSize = 15;
+      } else if (risk == 'MODERATE') {
+        color = Colors.orange;
+        zoneSize = 40;
+        markerSize = 14;
+      } else {
+        color = Colors.green;
+        zoneSize = 32;
+        markerSize = 13;
+      }
+
+      final point = ArcGISPoint(
+        x: longitude,
+        y: latitude,
+        spatialReference: SpatialReference.wgs84,
+      );
+
+      final zoneSymbol = SimpleMarkerSymbol(
+        style: SimpleMarkerSymbolStyle.circle,
+        color: color.withOpacity(0.28),
+        size: zoneSize,
+      );
+
+      final zoneGraphic = Graphic(
+        geometry: point,
+        symbol: zoneSymbol,
+      );
+
+      zoneGraphic.attributes['location'] = item['location'];
+      zoneGraphic.attributes['risk'] = risk;
+      zoneGraphic.attributes['rainfall'] = item['rainfall'];
+      zoneGraphic.attributes['soilMoisture'] =
+          item['soilMoisture'];
+      zoneGraphic.attributes['slope'] = item['slope'];
+
+      _landslideOverlay.graphics.add(zoneGraphic);
+
+      final markerSymbol = SimpleMarkerSymbol(
+        style: SimpleMarkerSymbolStyle.circle,
+        color: color,
+        size: markerSize,
+      );
+
+      final markerGraphic = Graphic(
+        geometry: point,
+        symbol: markerSymbol,
+      );
+
+      markerGraphic.attributes['location'] = item['location'];
+      markerGraphic.attributes['risk'] = risk;
+
+      _landslideOverlay.graphics.add(markerGraphic);
+    }
+  }
+
+  void _setGangtokViewpoint() {
+    final point = ArcGISPoint(
+      x: 88.4700,
+      y: 27.3400,
+      spatialReference: SpatialReference.wgs84,
+    );
+
+    final viewpoint = Viewpoint.fromCenter(
+      point,
+      scale: 380000,
+    );
+
+    _mapController.setViewpoint(viewpoint);
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _mapController.dispose();
     super.dispose();
   }
-
-  // ============================================================
-  // BUILD
-  // ============================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: background,
-
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -99,23 +240,14 @@ class _HomeScreenState extends State<HomeScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(),
-
                     const SizedBox(height: 22),
-
                     _buildActionCards(),
-
                     const SizedBox(height: 18),
-
                     _buildTrackLiveCard(),
-
                     const SizedBox(height: 18),
-
                     _buildMapCard(),
-
                     const SizedBox(height: 18),
-
                     _buildGetHelpCard(),
-
                     const SizedBox(height: 10),
                   ],
                 ),
@@ -127,14 +259,9 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ============================================================
-  // HEADER
-  // ============================================================
-
   Widget _buildHeader() {
     return Row(
       children: [
-        // PROFILE
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -146,7 +273,6 @@ class _HomeScreenState extends State<HomeScreen>
           },
           child: Row(
             children: [
-              // Profile circle
               Container(
                 width: 48,
                 height: 48,
@@ -172,9 +298,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-
               const SizedBox(width: 12),
-
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -199,14 +323,7 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
-
         const Spacer(),
-
-        // ========================================================
-        // NOTIFICATION
-        // NO RED BADGE
-        // ========================================================
-
         GestureDetector(
           onTap: () {
             Navigator.push(
@@ -246,10 +363,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ============================================================
-  // ACTION CARDS
-  // ============================================================
-
   Widget _buildActionCards() {
     return AnimatedBuilder(
       animation: _scaleAnimation,
@@ -265,9 +378,7 @@ class _HomeScreenState extends State<HomeScreen>
           Expanded(
             child: _buildPredictionCard(),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: _buildReportCard(),
           ),
@@ -275,11 +386,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-  // ============================================================
-  // LANDSLIDE PREDICTION
-  // NON CLICKABLE
-  // ============================================================
 
   Widget _buildPredictionCard() {
     return Container(
@@ -321,9 +427,7 @@ class _HomeScreenState extends State<HomeScreen>
                   size: 22,
                 ),
               ),
-
               const Spacer(),
-
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 8,
@@ -334,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen>
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
-                  'LIVE',
+                  'DEMO',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 9,
@@ -344,9 +448,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
-
           const Spacer(),
-
           const Text(
             'Landslide',
             style: TextStyle(
@@ -355,7 +457,6 @@ class _HomeScreenState extends State<HomeScreen>
               fontWeight: FontWeight.w700,
             ),
           ),
-
           const Text(
             'Prediction',
             style: TextStyle(
@@ -364,9 +465,7 @@ class _HomeScreenState extends State<HomeScreen>
               fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             'Risk monitoring',
             style: TextStyle(
@@ -379,11 +478,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ============================================================
-  // REPORT INCIDENT
-  // CLICKABLE
-  // ============================================================
-
   Widget _buildReportCard() {
     return Material(
       color: Colors.transparent,
@@ -393,7 +487,8 @@ class _HomeScreenState extends State<HomeScreen>
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const ReportIncidentScreen(),
+              builder: (context) =>
+                  const ReportIncidentScreen(),
             ),
           );
         },
@@ -432,9 +527,7 @@ class _HomeScreenState extends State<HomeScreen>
                       size: 22,
                     ),
                   ),
-
                   const Spacer(),
-
                   Container(
                     width: 30,
                     height: 30,
@@ -450,9 +543,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ],
               ),
-
               const Spacer(),
-
               const Text(
                 'Report',
                 style: TextStyle(
@@ -461,7 +552,6 @@ class _HomeScreenState extends State<HomeScreen>
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const Text(
                 'Landslide / Disaster',
                 maxLines: 1,
@@ -472,9 +562,7 @@ class _HomeScreenState extends State<HomeScreen>
                   fontWeight: FontWeight.w600,
                 ),
               ),
-
               const SizedBox(height: 4),
-
               const Text(
                 'Help your community',
                 style: TextStyle(
@@ -488,10 +576,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-  // ============================================================
-  // TRACK LIVE
-  // ============================================================
 
   Widget _buildTrackLiveCard() {
     return Container(
@@ -528,9 +612,7 @@ class _HomeScreenState extends State<HomeScreen>
               size: 23,
             ),
           ),
-
           const SizedBox(width: 11),
-
           const Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -557,11 +639,6 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
           ),
-
-          // ======================================================
-          // TRACK LIVE SWITCH
-          // ======================================================
-
           Transform.scale(
             scale: 0.78,
             child: Switch(
@@ -574,13 +651,7 @@ class _HomeScreenState extends State<HomeScreen>
               },
             ),
           ),
-
           const SizedBox(width: 2),
-
-          // ======================================================
-          // THREE DOT MENU
-          // ======================================================
-
           Material(
             color: Colors.transparent,
             child: InkWell(
@@ -609,71 +680,198 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  // ============================================================
-  // MAP
-  // ============================================================
-
   Widget _buildMapCard() {
     return Container(
       width: double.infinity,
-      height: 360,
+      height: 390,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: const Color(0xFFE9EDF3),
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
           color: Colors.grey.shade300,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Stack(
         children: [
-          const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.map_outlined,
-                  color: Color(0xFF9AA5B8),
-                  size: 48,
-                ),
-
-                SizedBox(height: 8),
-
-                Text(
-                  'MAP',
-                  style: TextStyle(
-                    color: Color(0xFF8A94A6),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 2,
-                  ),
-                ),
-              ],
+          Positioned.fill(
+            child: ArcGISMapView(
+              controllerProvider: () => _mapController,
+              onMapViewReady: _onMapReady,
             ),
           ),
-
-          // ======================================================
-          // CURRENT LOCATION BUTTON
-          // ======================================================
-
+          Positioned(
+            top: 14,
+            left: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: primaryBlue,
+                    size: 17,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Landslide Risk Map',
+                    style: TextStyle(
+                      color: textDark,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 14,
+            right: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.science_outlined,
+                    size: 14,
+                    color: Colors.orange,
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    'DEMO DATA',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      color: textDark,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 14,
+            bottom: 14,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Risk Level',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: textDark,
+                    ),
+                  ),
+                  SizedBox(height: 7),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _LegendDot(color: Colors.red),
+                      SizedBox(width: 5),
+                      Text(
+                        'High',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: textDark,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      _LegendDot(color: Colors.orange),
+                      SizedBox(width: 5),
+                      Text(
+                        'Moderate',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: textDark,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      _LegendDot(color: Colors.green),
+                      SizedBox(width: 5),
+                      Text(
+                        'Low',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: textDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           Positioned(
             right: 14,
             bottom: 14,
             child: Material(
               color: Colors.white,
-              elevation: 3,
+              elevation: 4,
               shape: const CircleBorder(),
               child: InkWell(
                 customBorder: const CircleBorder(),
-                onTap: () {
-                  // Map/location functionality will be added later.
-                },
+                onTap: _setGangtokViewpoint,
                 child: const SizedBox(
-                  width: 46,
-                  height: 46,
+                  width: 48,
+                  height: 48,
                   child: Icon(
                     Icons.my_location_rounded,
                     color: primaryBlue,
-                    size: 22,
+                    size: 23,
                   ),
                 ),
               ),
@@ -683,10 +881,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-  // ============================================================
-  // GET HELP / EMERGENCY
-  // ============================================================
 
   Widget _buildGetHelpCard() {
     return Material(
@@ -727,10 +921,6 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           child: Row(
             children: [
-              // ==================================================
-              // EMERGENCY ICON
-              // ==================================================
-
               Container(
                 width: 50,
                 height: 50,
@@ -739,7 +929,6 @@ class _HomeScreenState extends State<HomeScreen>
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white.withOpacity(0.25),
-                    width: 1,
                   ),
                 ),
                 child: const Icon(
@@ -748,13 +937,7 @@ class _HomeScreenState extends State<HomeScreen>
                   size: 27,
                 ),
               ),
-
               const SizedBox(width: 14),
-
-              // ==================================================
-              // TEXT
-              // ==================================================
-
               const Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -768,9 +951,7 @@ class _HomeScreenState extends State<HomeScreen>
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-
                     SizedBox(height: 3),
-
                     Text(
                       'Emergency & assistance',
                       style: TextStyle(
@@ -782,11 +963,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ],
                 ),
               ),
-
-              // ==================================================
-              // ARROW
-              // ==================================================
-
               Container(
                 width: 38,
                 height: 38,
@@ -803,6 +979,26 @@ class _HomeScreenState extends State<HomeScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  final Color color;
+
+  const _LegendDot({
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
